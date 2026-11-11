@@ -148,3 +148,100 @@
 
 </body>
 </html>
+<style>
+  #buddy-chat {
+    max-width: 500px;
+    margin: 25px auto;
+    padding: 16px;
+    background: #ffffff;
+    border-radius: 16px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 12px #0002;
+  }
+
+  #buddy-chat h2 {
+    text-align: center;
+    color: #2563eb;
+  }
+
+  #buddy-messages {
+    height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    background: #f1f5f9;
+    border-radius: 10px;
+  }
+
+  .buddy-message {
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 10px;
+    background: #dbeafe;
+  }
+
+  .user-message {
+    background: #dcfce7;
+    text-align: right;
+  }
+
+  #buddy-input {
+    width: 70%;
+    padding: 12px;
+    margin-top: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+
+  #buddy-send {
+    padding: 12px;
+    background: #2563eb;
+    color: white;
+    border: 0;
+    border-radius: 8px;
+  }
+</style>
+
+<div id="buddy-chat">
+  <h2>Buddy AI</h2>
+  <div id="buddy-messages">
+    <div class="buddy-message">
+      Hello! Welcome to Buddy AI.
+    </div>
+  </div>
+
+  <input id="buddy-input" type="text"
+    placeholder="Type your message...">
+
+  <button id="buddy-send">Send</button>
+</div>
+
+<script>
+  const input = document.getElementById("buddy-input");
+  const messages = document.getElementById("buddy-messages");
+  const send = document.getElementById("buddy-send");
+
+  function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    const userMessage = document.createElement("div");
+    userMessage.className = "buddy-message user-message";
+    userMessage.textContent = text;
+    messages.appendChild(userMessage);
+
+    const reply = document.createElement("div");
+    reply.className = "buddy-message";
+    reply.textContent =
+      "Hello! I am Buddy AI. Your AI connection will be added soon.";
+    messages.appendChild(reply);
+
+    input.value = "";
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  send.addEventListener("click", sendMessage);
+
+  input.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") sendMessage();
+  });
+</script>
