@@ -1,0 +1,11 @@
+{
+  "name": "ai-buddy",
+  "version": "1.0.0",
+  "main": "API.js",
+  "scripts": {
+    "start": "node API.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
