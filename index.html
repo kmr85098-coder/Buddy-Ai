@@ -1,80 +1,24 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buddy AI Voice</title>
-
-<style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: #080d19;
-  color: white;
-  font-family: Arial, sans-serif;
-  text-align: center;
-}
-
-.app {
-  max-width: 500px;
-  margin: auto;
-  padding: 30px 20px;
-}
-
-h1 {
-  color: #38bdf8;
-}
-
-.orb {
-  width: 190px;
-  height: 190px;
-  margin: 70px auto 30px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #38bdf8, #075985, #101827);
-  box-shadow: 0 0 50px #0284c7;
-}
-
-button {
-  border: none;
-  border-radius: 40px;
-  padding: 18px 35px;
-  background: #0284c7;
-  color: white;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-#status {
-  margin-top: 25px;
-  color: #38bdf8;
-}
-
-#result {
-  margin-top: 20px;
-  line-height: 1.6;
-}
-</style>
-</head>
-
-<body>
-<div class="app">
-
-<h1>🤖 Buddy AI</h1>
-<p>Your Personal Voice Assistant</p>
-
-<div class="orb"></div>
-
-<button onclick="startVoice()">🎙️ बात करें</button>
-
-<p id="status">माइक दबाकर बोलिए</p>
-<p id="result"></p>
-
-</div>
-
 <script>
+let recognition;
+let isListening = false;
+
+function speak(text) {
+  if (!("speechSynthesis" in window)) {
+    document.getElementById("status").innerText =
+      "आपका ब्राउज़र आवाज़ में जवाब नहीं दे सकता।";
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "hi-IN";
+  utterance.rate = 1;
+  utterance.pitch = 1;
+
+  window.speechSynthesis.speak(utterance);
+}
+
 function startVoice() {
   const Speech =
     window.SpeechRecognition ||
@@ -82,12 +26,13 @@ function startVoice() {
 
   if (!Speech) {
     document.getElementById("status").innerText =
-      "आपका ब्राउज़र Voice Support नहीं करता।";
+      "ब्राउज़र Voice Support नहीं करता।";
     return;
   }
 
-  const recognition = new Speech();
+  recognition = new Speech();
   recognition.lang = "hi-IN";
+  recognition.interimResults = false;
 
   document.getElementById("status").innerText =
     "मैं आपकी बात सुन रहा हूँ...";
@@ -98,8 +43,16 @@ function startVoice() {
     document.getElementById("result").innerText =
       "आपने कहा: " + message;
 
+    const reply = "आपने कहा: " + message +
+      "। मैं आपकी बात सुन रहा हूँ।";
+
     document.getElementById("status").innerText =
-      "आपकी आवाज़ मिल गई!";
+      "जवाब दे रहा हूँ...";
+
+    speak(reply);
+
+    document.getElementById("status").innerText =
+      "जवाब तैयार है।";
   };
 
   recognition.onerror = function() {
@@ -110,6 +63,3 @@ function startVoice() {
   recognition.start();
 }
 </script>
-
-</body>
-</html>
