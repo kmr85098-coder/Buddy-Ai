@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Buddy AI is running!");
+  res.send("Buddy AI is running with Grok!");
 });
 
 app.post("/chat", async (req, res) => {
@@ -22,15 +22,15 @@ app.post("/chat", async (req, res) => {
     }
 
     const response = await fetch(
-      "https://api.openai.com/v1/responses",
+      "https://api.x.ai/v1/responses",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+          "Authorization": `Bearer ${process.env.XAI_API_KEY}`
         },
         body: JSON.stringify({
-          model: "gpt-4.1-mini",
+          model: "grok-4.7",
           instructions:
             "You are Kamran's friendly AI Buddy. Reply in the same language as the user.",
           input: message
@@ -43,7 +43,7 @@ app.post("/chat", async (req, res) => {
     if (!response.ok) {
       console.error(data);
       return res.status(500).json({
-        error: "AI service error"
+        error: "Grok AI service error"
       });
     }
 
@@ -53,6 +53,7 @@ app.post("/chat", async (req, res) => {
 
   } catch (error) {
     console.error(error);
+
     res.status(500).json({
       error: "Server error"
     });
