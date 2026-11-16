@@ -1,3 +1,4 @@
+require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
@@ -8,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Buddy AI is running with Grok!");
+  res.send("Buddy AI is running with Groq!");
 });
 
 app.post("/chat", async (req, res) => {
@@ -21,19 +22,34 @@ app.post("/chat", async (req, res) => {
       });
     }
 
+    const apiKey = process.env.GROQ_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({
+        error: "Groq API key is missing"
+      });
+    }
+
     const response = await fetch(
-      "https://api.x.ai/v1/responses",
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.XAI_API_KEY}`
+          "Authorization": `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: "grok-4.7",
-          instructions:
-            "You are Kamran's friendly AI Buddy. Reply in the same language as the user.",
-          input: message
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            {
+              role: "system",
+              content: "You are Kamran's friendly AI Buddy. Reply in the same language as the user."
+            },
+            {
+              role: "user",
+              content: message
+            }
+          ]
         })
       }
     );
@@ -41,18 +57,18 @@ app.post("/chat", async (req, res) => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error(data);
+      console.error("Groq API Error:", data);
       return res.status(500).json({
-        error: "Grok AI service error"
+        error: "Groq AI service error"
       });
     }
 
     res.json({
-      reply: data.output_text || "Please try again."
+      reply: data.choices?.[0]?.message?.content || "Please try again."
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Server Error:", error);
 
     res.status(500).json({
       error: "Server error"
