@@ -1,65 +1,184 @@
-<script>
-let recognition;
-let isListening = false;
 
-function speak(text) {
-  if (!("speechSynthesis" in window)) {
-    document.getElementById("status").innerText =
-      "आपका ब्राउज़र आवाज़ में जवाब नहीं दे सकता।";
-    return;
-  }
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buddy AI</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #101827;
+      color: white;
+    }
+    .app {
+      max-width: 650px;
+      margin: auto;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #55d6be;
+    }
+    #chat {
+      height: 60vh;
+      overflow-y: auto;
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 12px;
+    }
+    .message {
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      white-space: pre-wrap;
+    }
+    .user {
+      background: #245b78;
+      text-align: right;
+    }
+    .bot {
+      background: #334155;
+    }
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 13px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #14b8a6;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #status {
+      color: #55d6be;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>🤖 Buddy AI</h1>
+    <div id="chat"></div>
 
-  window.speechSynthesis.cancel();
+    <div class="controls">
+      <input id="message" placeholder="अपना मैसेज लिखें...">
+      <button onclick="sendMessage()">Send</button>
+      <button onclick="startVoice()">🎤</button>
+    </div>
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "hi-IN";
-  utterance.rate = 1;
-  utterance.pitch = 1;
+    <p id="status">Buddy AI तैयार है।</p>
+  </div>
 
-  window.speechSynthesis.speak(utterance);
-}
+  <script>
+    const API_URL = "https://buddy-ai-1.onrender.com/chat";
 
-function startVoice() {
-  const Speech =
-    window.SpeechRecognition ||
-    window.webkitSpeechRecognition;
+    function addMessage(text, type) {
+      const chat = document.getElementById("chat");
+      const div = document.createElement("div");
+      div.className = "message " + type;
+      div.textContent = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
 
-  if (!Speech) {
-    document.getElementById("status").innerText =
-      "ब्राउज़र Voice Support नहीं करता।";
-    return;
-  }
+    function speak(text) {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "hi-IN";
+      window.speechSynthesis.speak(utterance);
+    }
 
-  recognition = new Speech();
-  recognition.lang = "hi-IN";
-  recognition.interimResults = false;
+    async function sendMessage(message) {
+      const input = document.getElementById("message");
+      message = message || input.value.trim();
 
-  document.getElementById("status").innerText =
-    "मैं आपकी बात सुन रहा हूँ...";
+      if (!message) return;
 
-  recognition.onresult = function(event) {
-    const message = event.results[0][0].transcript;
+      addMessage(message, "user");
+      input.value = "";
 
-    document.getElementById("result").innerText =
-      "आपने कहा: " + message;
+      document.getElementById("status").innerText =
+        "Grok जवाब तैयार कर रहा है...";
 
-    const reply = "आपने कहा: " + message +
-      "। मैं आपकी बात सुन रहा हूँ।";
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message })
+        });
 
-    document.getElementById("status").innerText =
-      "जवाब दे रहा हूँ...";
+        const data = await response.json();
 
-    speak(reply);
+        if (!response.ok) {
+          throw new Error(data.error || "API error");
+        }
 
-    document.getElementById("status").innerText =
-      "जवाब तैयार है।";
-  };
+        const reply = data.reply || "कोई जवाब नहीं मिला।";
+        addMessage(reply, "bot");
+        speak(reply);
 
-  recognition.onerror = function() {
-    document.getElementById("status").innerText =
-      "माइक की अनुमति जाँचें और दोबारा कोशिश करें।";
-  };
+        document.getElementById("status").innerText =
+          "Buddy AI तैयार है।";
 
-  recognition.start();
-}
-</script>
+      } catch (error) {
+        addMessage("माफ कीजिए, कनेक्शन में समस्या है।", "bot");
+        document.getElementById("status").innerText =
+          "Error: " + error.message;
+      }
+    }
+
+    function startVoice() {
+      const Speech =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+      if (!Speech) {
+        document.getElementById("status").innerText =
+          "आपका ब्राउज़र Voice Support नहीं करता।";
+        return;
+      }
+
+      const recognition = new Speech();
+      recognition.lang = "hi-IN";
+      recognition.interimResults = false;
+
+      document.getElementById("status").innerText =
+        "मैं आपकी बात सुन रहा हूँ...";
+
+      recognition.onresult = function(event) {
+        const message = event.results[0][0].transcript;
+        sendMessage(message);
+      };
+
+      recognition.onerror = function() {
+        document.getElementById("status").innerText =
+          "माइक की अनुमति जाँचें।";
+      };
+
+      recognition.start();
+    }
+
+    document.getElementById("message")
+      .addEventListener("keydown", function(event) {
+        if (event.key === "Enter") sendMessage();
+      });
+  </script>
+</body>
+</html>
