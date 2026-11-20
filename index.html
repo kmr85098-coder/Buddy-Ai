@@ -403,26 +403,6 @@ function stopBuddy() {
 <div class="history-item" id="historyItem">
   <button onclick="newChat()">＋ नई चैट</button>
 </div>
-
-  
-<!-- PART 9 - NEW CHAT FUNCTION -->
-
-  const messages = document.getElementById("messages");
-  const input = document.getElementById("messageInput");
-
-  if (messages) {
-    messages.innerHTML = "";
-  }
-
-  if (input) {
-    input.value = "";
-  }
-
-  currentChatId = Date.now();
-  setStatus("नई चैट शुरू हो गई");
-}
-</script>
-
   
 <!-- PART 10 - FINAL SETUP -->
 <script>
