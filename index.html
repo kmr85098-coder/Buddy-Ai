@@ -1,375 +1,190 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-  <link rel="manifest" href="./manifest.json">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#101827">
+<link rel="manifest" href="./manifest.json">
 <title>Buddy AI</title>
 <style>
-* {
-  box-sizing: border-box;
-}
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: white;
-  color: #202123;
-}
-.app {
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
-  .sidebar {
-  width: 260px;
-  background: #f7f7f8;
-  border-right: 1px solid #eee;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 22px;
-  font-weight: bold;
-  margin-bottom: 25px;
-}
-.logo {
-  width: 40px;
-  height: 40px;
-  background: #2563eb;
-  color: white;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  font-size: 24px;
-}
-button {
-  cursor: pointer;
-}
-.newchat {
-  padding: 13px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  text-align: left;
-  font-size: 15px;
-  margin-bottom: 22px;
-}
-.history-title {
-  font-size: 12px;
-  color: #777;
-  margin-bottom: 10px;
-}
-.history {
-  overflow-y: auto;
-  flex: 1;
-}
-.history-item {
-  padding: 11px;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
-  margin-bottom: 4px;
-}
-.history-item.active,
-.history-item:hover {
-  background: #e5e5e5;
-}
-
-.main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-.topbar {
-  height: 65px;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  align-items: center;
-  padding: 0 18px;
-  gap: 12px;
-}
-.menu-btn {
-  border: 0;
-  background: transparent;
-  font-size: 23px;
-}
-.chat-area {
-  flex: 1;
-  overflow-y: auto;
-  padding: 22px;
-}
-.welcome {
-  text-align: center;
-  margin: 15vh auto 0;
-  max-width: 500px;
-}
-.welcome h1 {
-  font-size: 30px;
-}
-.message {
-  max-width: 800px;
-  margin: 18px auto;
-  padding: 14px 17px;
-  border-radius: 14px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-.user-message {
-  background: #eaf2ff;
-  margin-right: max(0px, calc((100% - 800px) / 2));
-}
-.ai-message {
-  background: #f5f5f5;
-  margin-left: max(0px, calc((100% - 800px) / 2));
-}
-.composer {
-  padding: 15px;
-  border-top: 1px solid #eee;
-  display: flex;
-  gap: 10px;
-  max-width: 850px;
-  width: 100%;
-  margin: auto;
-}
-.composer textarea {
-  flex: 1;
-  resize: none;
-  min-height: 48px;
-  max-height: 120px;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 13px;
-  font: inherit;
-  outline: none;
-}
-.send-btn, .mic-btn {
-  border: 0;
-  border-radius: 12px;
-  padding: 0 16px;
-  background: #2563eb;
-  color: white;
-  font-size: 18px;
-}
-@media (max-width: 650px) {
-  .sidebar {
-    position: fixed;
-    z-index: 5;
-    left: -270px;
-    top: 0;
-    bottom: 0;
-    transition: left .2s;
-  }
-  .sidebar.open {
-    left: 0;
-  }
-  .main {
-    width: 100%;
-  }
-  .chat-area {
-    padding: 12px;
-  }
-  .welcome h1 {
-    font-size: 24px;
-  }
-}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#101827;color:#f1f5f9}
+.app{display:flex;height:100vh;height:100dvh;overflow:hidden}
+.sidebar{width:270px;background:#0b1220;border-right:1px solid #263247;padding:18px;display:flex;flex-direction:column;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:bold;margin-bottom:28px}
+.logo{width:42px;height:42px;background:linear-gradient(135deg,#2563eb,#8b5cf6);border-radius:14px;display:grid;place-items:center;font-size:24px}
+button{cursor:pointer;font-family:inherit}
+.newchat{padding:13px;background:#172338;color:white;border:1px solid #34445d;border-radius:12px;text-align:left;font-size:15px;margin-bottom:25px}
+.history-title{font-size:12px;color:#8b9bb2;margin-bottom:12px}
+.history{overflow-y:auto;flex:1}
+.history-item{padding:12px;border-radius:9px;font-size:14px;color:#cbd5e1;cursor:pointer;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history-item.active,.history-item:hover{background:#1e2c43;color:white}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;height:100%;background:radial-gradient(ellipse at top,#1a2943,#101827 55%)}
+.topbar{height:65px;flex-shrink:0;border-bottom:1px solid #263247;display:flex;align-items:center;padding:0 20px;gap:14px;background:#101827dd}
+.menu-btn{border:0;background:transparent;color:#e2e8f0;font-size:24px}
+.chat-area{flex:1;overflow-y:auto;padding:25px 20px}
+.welcome{text-align:center;margin:15vh auto 0;max-width:550px;padding:20px}
+.welcome h1{font-size:34px;background:linear-gradient(90deg,#60a5fa,#c084fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+.welcome p{color:#aab8cc;line-height:1.7}
+.message{max-width:800px;margin:18px auto;padding:15px 18px;border-radius:16px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.user-message{background:#244574;color:white;margin-right:max(0px,calc((100% - 800px)/2));border:1px solid #37639d}
+.ai-message{background:#1b293e;color:#e5edf8;margin-left:max(0px,calc((100% - 800px)/2));border:1px solid #30425d}
+.composer{padding:15px 18px;border-top:1px solid #263247;display:flex;gap:9px;max-width:900px;width:100%;margin:0 auto;background:#101827}
+.composer textarea{flex:1;resize:none;min-width:0;min-height:48px;max-height:120px;border:1px solid #34445d;border-radius:15px;padding:14px;font:inherit;background:#1b293e;color:white;outline:none}
+.composer textarea::placeholder{color:#91a0b6}
+.send-btn,.mic-btn,.stop-btn,.voice-btn{border:0;border-radius:13px;padding:0 13px;color:white;font-size:17px;min-height:46px}
+.send-btn,.mic-btn{background:linear-gradient(135deg,#2563eb,#6d5ce8)}
+.stop-btn{background:#b42332}
+.voice-btn{background:#334155;font-size:13px}
+.status{text-align:center;color:#9fb2cc;font-size:12px;padding:5px;min-height:22px}
 </style>
 </head>
 <body>
 <div class="app">
-
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <div class="logo">🤖</div>
-      <span>Buddy AI</span>
-    </div>
-
-    <button class="newchat" onclick="createChat()">
-      + New Chat
-    </button>
-
-    <div class="history-title">CHAT HISTORY</div>
-    <div class="history" id="history"></div>
-  </aside>
-
-  <main class="main">
-    <header class="topbar">
-      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-      <strong>Buddy AI</strong>
-    </header>
-
-    <section class="chat-area" id="chatArea">
-      <div class="welcome" id="welcome">
-        <h1>Hello! 👋</h1>
-        <p>मैं Buddy AI हूँ। आज मैं आपकी क्या मदद करूँ?</p>
-      </div>
-      <div id="messages"></div>
-    </section>
-
-    <div class="composer">
-      <button class="mic-btn" onclick="startVoice()">🎤</button>
-      <textarea id="messageInput"
-        placeholder="अपना मैसेज लिखें..."
-        rows="1"></textarea>
-      <button class="send-btn" onclick="sendMessage()">➤</button>
-    </div>
-  </main>
-
+<aside class="sidebar" id="sidebar">
+<div class="brand"><div class="logo">🤖</div><span>Buddy AI</span></div>
+<button class="newchat" onclick="createChat()">+ New Chat</button>
+<div class="history-title">CHAT HISTORY</div>
+<div class="history" id="history"></div>
+</aside>
+<main class="main">
+<header class="topbar">
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<strong>Buddy AI</strong>
+</header>
+<section class="chat-area" id="chatArea">
+<div class="welcome" id="welcome">
+<h1>Hello! 👋</h1>
+<p>मैं Buddy AI हूँ। आज मैं आपकी क्या मदद करूँ?</p>
 </div>
-<script>
-const API_URL = "https://buddy-ai-1.onrender.com/chat";
-const STORAGE_KEY = "buddyChatsV1";
-const CURRENT_KEY = "buddyCurrentChatV1";
-
-let chats = {};
-let currentChatId = "";
-
-function makeId() {
-  return Date.now().toString() + Math.random().toString(36).slice(2);
+<div id="messages"></div>
+</section>
+<div class="status" id="voiceStatus">Buddy AI तैयार है</div>
+function render(){
+const messages=document.getElementById("messages");
+const welcome=document.getElementById("welcome");
+messages.replaceChildren();
+const chat=chats[currentChatId];
+if(!chat)return;
+welcome.style.display=chat.messages.length?"none":"block";
+chat.messages.forEach(msg=>{
+const div=document.createElement("div");
+div.className="message "+(msg.role==="user"?"user-message":"ai-message");
+div.textContent=msg.text;
+messages.appendChild(div);
+});
+renderHistory();
+const area=document.getElementById("chatArea");
+area.scrollTop=area.scrollHeight;
 }
-
-function saveChats() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
-  localStorage.setItem(CURRENT_KEY, currentChatId);
+function addMessage(role,text){
+chats[currentChatId].messages.push({role,text});
+if(role==="user"&&chats[currentChatId].messages.length===1){
+chats[currentChatId].title=text.slice(0,25);
 }
-
-function loadChats() {
-  try {
-    chats = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch {
-    chats = {};
-  }
-
-  currentChatId = localStorage.getItem(CURRENT_KEY) || "";
-
-  if (!currentChatId || !chats[currentChatId]) {
-    createChat();
-  } else {
-    render();
-  }
+saveChats();
+render();
 }
-
-function createChat() {
-  currentChatId = makeId();
-
-  chats[currentChatId] = {
-    id: currentChatId,
-    title: "नई चैट",
-    messages: []
-  };
-
-  saveChats();
-  render();
-  closeSidebar();
+async function sendMessage(){
+const input=document.getElementById("messageInput");
+const text=input.value.trim();
+if(!text)return;
+stopSpeaking();
+const thisRequest=++requestNumber;
+const thisChatId=currentChatId;
+input.value="";
+addMessage("user",text);
+const sendButton=document.querySelector(".send-btn");
+sendButton.disabled=true;
+setStatus("Buddy AI जवाब तैयार कर रहा है...");
+try{
+const response=await fetch(API_URL,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({message:text,chatId:thisChatId})
+});
+const data=await response.json();
+if(!response.ok)throw new Error(data.error||"AI server error");
+const reply=data.reply||data.response;
+if(!reply)throw new Error("AI का जवाब नहीं मिला");
+if(thisRequest!==requestNumber||thisChatId!==currentChatId)return;
+addMessage("assistant",reply);
+speakReply(reply);
+}catch(error){
+if(thisRequest===requestNumber){
+addMessage("assistant","माफ़ कीजिए, कनेक्शन में समस्या है। कृपया दोबारा कोशिश करें।");
+setStatus("कनेक्शन में समस्या आई");
+console.error(error);
 }
-
-function renderHistory() {
-  const history = document.getElementById("history");
-  history.replaceChildren();
-
-  Object.values(chats)
-    .reverse()
-    .forEach(chat => {
-      const item = document.createElement("div");
-      item.className = "history-item" +
-        (chat.id === currentChatId ? " active" : "");
-      item.textContent = chat.title;
-      item.onclick = () => {
-        currentChatId = chat.id;
-        saveChats();
-        render();
-        closeSidebar();
-      };
-      history.appendChild(item);
-    });
+}finally{
+if(thisRequest===requestNumber)sendButton.disabled=false;
 }
-
-function render() {
-  const messages = document.getElementById("messages");
-  const welcome = document.getElementById("welcome");
-
-  messages.replaceChildren();
-
-  const chat = chats[currentChatId];
-  if (!chat) return;
-
-  welcome.style.display =
-    chat.messages.length ? "none" : "block";
-
-  chat.messages.forEach(msg => {
-    const div = document.createElement("div");
-    div.className = "message " +
-      (msg.role === "user" ? "user-message" : "ai-message");
-    div.textContent = msg.text;
-    messages.appendChild(div);
-  });
-
-  renderHistory();
-
-  const area = document.getElementById("chatArea");
-  area.scrollTop = area.scrollHeight;
 }
-
-function addMessage(role, text) {
-  chats[currentChatId].messages.push({ role, text });
-
-  if (role === "user" &&
-      chats[currentChatId].messages.length === 1) {
-    chats[currentChatId].title = text.slice(0, 25);
-  }
-
-  saveChats();
-  render();
+function toggleSidebar(){
+document.getElementById("sidebar").classList.toggle("open");
 }
-
-async function sendMessage() {
-  const input = document.getElementById("messageInput");
-  const text = input.value.trim();
-
-  if (!text) return;
-
-  input.value = "";
-  addMessage("user", text);
-
-  const sendButton = document.querySelector(".send-btn");
-  sendButton.disabled = true;
-
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        message: text,
-        chatId: currentChatId
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "AI server error");
-    }
-
-    const reply = data.reply || data.response;
-
-    if (!reply) {
-      throw new Error("AI का जवाब नहीं मिला");
-    }
-
-    addMessage("assistant", reply);
-
-    if ("speechSynthesis" in window) {
-      const speech = new SpeechSynthesisUtterance(reply);
-      speech.lang = "hi-IN";
-
-        console.log("Service Worker Registere
+function closeSidebar(){
+document.getElementById("sidebar").classList.remove("open");
+}
+  function startVoice(){
+const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!Recognition){
+alert("इस ब्राउज़र में Voice Input उपलब्ध नहीं है।");
+return;
+}
+stopSpeaking();
+if(recognition&&isListening){
+recognition.stop();
+return;
+}
+recognition=new Recognition();
+recognition.lang="hi-IN";
+recognition.continuous=false;
+recognition.interimResults=false;
+recognition.onstart=()=>{
+isListening=true;
+setStatus("मैं सुन रहा हूँ, बोलिए...");
+};
+recognition.onresult=event=>{
+const spokenText=event.results[0][0].transcript.trim();
+const stopWords=["रुक जाओ","चुप हो जाओ","बंद हो जाओ","बस करो","stop","shut up"];
+if(stopWords.some(word=>spokenText.toLowerCase().includes(word.toLowerCase()))){
+stopSpeaking();
+setStatus("ठीक है, मैं रुक गया");
+return;
+}
+document.getElementById("messageInput").value=spokenText;
+setStatus("आपकी बात लिख दी गई है। भेजने के लिए ➤ दबाएँ।");
+};
+recognition.onerror=event=>{
+isListening=false;
+setStatus("माइक में समस्या: "+event.error);
+};
+recognition.onend=()=>{
+isListening=false;
+};
+try{
+recognition.start();
+}catch(error){
+isListening=false;
+setStatus("माइक शुरू नहीं हो पाया");
+console.error(error);
+}
+}
+document.getElementById("messageInput").addEventListener("keydown",event=>{
+if(event.key==="Enter"&&!event.shiftKey){
+event.preventDefault();
+sendMessage();
+}
+});
+loadChats();
+if("serviceWorker" in navigator){
+window.addEventListener("load",()=>{
+navigator.serviceWorker.register("./service-worker.js")
+.then(()=>console.log("Service Worker Registered"))
+.catch(error=>console.error("Service Worker Error:",error));
+});
+}
+</script>
+</body>
+</html>
