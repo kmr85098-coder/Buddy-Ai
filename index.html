@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1769e8">
+<title>Buddy AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:#fff;color:#17243a}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.app{height:100dvh;display:flex}
+.sidebar{width:255px;background:#f1f6ff;padding:15px;border-right:1px solid #dce6f5;display:flex;flex-direction:column;gap:10px}
+.brand{font-size:23px;font-weight:bold;color:#1769e8;padding:10px}
+.sidebtn{border:0;background:transparent;text-align:left;padding:12px;border-radius:10px;color:#34445d}
+.sidebtn:hover,.sidebtn.active{background:#dfeeff;color:#145ac0}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{height:60px;border-bottom:1px solid #e5eaf2;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.top strong{color:#1769e8;font-size:19px}
+.chat{flex:1;overflow:auto;padding:20px}
+.inner{max-width:780px;margin:auto}
+.welcome{text-align:center;padding:10vh 10px 20px}
+.welcome h1{font-size:26px}
+.welcome p{color:#77849a}
+.msg{display:flex;gap:10px;margin:20px auto;max-width:750px;line-height:1.6}
+.avatar{background:#e7f0ff;color:#1769e8;border-radius:10px;padding:8px;font-weight:bold;height:32px}
+.bubble{white-space:pre-wrap;overflow-wrap:anywhere;padding:5px}
+.msg.user .bubble{background:#edf4ff;padding:10px 14px;border-radius:4px 14px 14px}
+.composerarea{padding:12px;border-top:1px solid #e5eaf2}
+.composer{max-width:780px;margin:auto;border:1px solid #dce5f1;border-radius:18px;padding:8px;display:flex;gap:7px;align-items:end;box-shadow:0 4px 18px #0000000c}
+.composer textarea{flex:1;border:0;outline:0;resize:none;min-height:35px;max-height:120px;padding:9px}
+.tool{border:0;border-radius:12px;background:#edf4ff;color:#1769e8;padding:10px 13px}
+.send{background:#1769e8;color:white}
+.panel{display:none;position:fixed;inset:0;background:#fff;z-index:5;overflow:auto;padding:22px}
+.panel.show{display:block}
+.panelhead{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5eaf2;padding-bottom:12px}
+.panelhead h2{color:#1769e8}
+.close{background:#edf4ff;color:#1769e8;border:0;border-radius:10px;padding:10px}
+.panelcontent{max-width:650px;margin:22px auto}
+.card{border:1px solid #dfe7f2;border-radius:14px;padding:15px;margin:12px 0}
+.card input,.card textarea{width:100%;padding:10px;border:1px solid #dce5f1;border-radius:9px;margin:6px 0}
+.primary{background:#1769e8;color:#fff;border:0;border-radius:10px;padding:11px 15px}
+.danger{background:#ffe9e9;color:#c22;border:0;border-radius:9px;padding:8px}
+.voice{display:none;position:fixed;inset:0;z-index:9;background:radial-gradient(circle,#398cff,#1769e8,#073d9b);color:white;align-items:center;justify-content:center;flex-direction:column;text-align:center}
+.voice.show{display:flex}
+.orb{width:155px;height:155px;border-radius:50%;background:#ffffff22;border:1px solid #ffffff88;display:grid;place-items:center;font-size:55px;margin:25px;animation:pulse 1.7s infinite}
+@keyframes pulse{50%{transform:scale(1.06);box-shadow:0 0 0 25px #ffffff18}}
+.voice button{border:1px solid #ffffff88;background:#ffffff22;color:white;padding:13px;border-radius:12px;margin:6px}
+.voice .stop{background:white;color:#1457bd}
+.small{font-size:12px;color:#8794a8}
+@media(max-width:700px){.sidebar{width:58px;padding:8px}.brand{font-size:0;padding:8px}.brand:after{content:"B";font-size:22px}.sidebtn{font-size:0;text-align:center;padding:12px 3px}.sidebtn:first-letter{font-size:18px}.chat{padding:12px}.welcome{padding-top:8vh}.welcome h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<div class="brand">Buddy AI</div>
+<button class="sidebtn" onclick="newChat()">＋ नया चैट</button>
+<button class="sidebtn" onclick="openPanel('imagePanel')">🖼 Image</button>
+<button class="sidebtn" onclick="openPanel('libraryPanel')">📚 Library</button>
+<button class="sidebtn" onclick="openPanel('projectPanel')">📁 Projects</button>
+<button class="sidebtn" onclick="openPanel('remotePanel')">🌐 Remote</button>
+<button class="sidebtn" onclick="openPanel('alarmPanel')">⏰ Alarm</button>
+<hr>
+<div class="small">पुरानी बातचीत</div>
+<div id="history"></div>
+</aside>
+
+<main class="main">
+<header class="top">
+<strong>🔵 Buddy AI</strong>
+<div>
+<button class="tool" onclick="openVoice()">🎙 Voice</button>
+<button class="tool" onclick="newChat()">＋</button>
+</div>
+</header>
+<section class="chat" id="chat">
+<div class="inner" id="messages">
+<div class="welcome" id="welcome">
+<h1>आज मैं आपकी क्या मदद करूँ?</h1>
+<p>Buddy AI से कुछ भी पूछें।</p>
+</div>
+</div>
+</section>
+<div class="composerarea">
+<div class="composer">
+<button class="tool" onclick="document.getElementById('file').click()">＋</button>
+<input type="file" id="file" hidden accept="image/*" onchange="addFile(this)">
+<button class="tool" onclick="dictate()">🎙</button>
+<textarea id="question" placeholder="Buddy AI से पूछें..."></textarea>
+<button class="tool send" id="send" onclick="sendMessage()">➤</button>
+</div>
+<p class="small" style="text-align:center">AI के जवाबों को ज़रूरत के अनुसार जाँच लें।</p>
+</div>
+</main>
+</div>
+
+<!-- Voice screen -->
+<div class="voice" id="voice">
+<button class="close" style="position:absolute;right:15px;top:15px" onclick="closeVoice()">बंद करें ✕</button>
+<div class="orb">🎙</div>
+<h2 id="voiceStatus">मैं सुन रहा हूँ</h2>
+<p>बोलकर बात करें। “रुको” या “बस” कहने पर आवाज़ रोकने की कोशिश होगी।</p>
+<div>
+<button onclick="toggleMute()" id="mute">🔇 आवाज़ बंद</button>
+<button class="stop" onclick="stopSpeaking()">■ रोकें</button>
+</div>
+</div>
+
+<!-- Image -->
+<div class="panel" id="imagePanel">
+<div class="panelhead"><h2>🖼 Image</h2><button class="close" onclick="closePanels()">बंद करें ✕</button></div>
+<div class="panelcontent"><div class="card"><h3>अपनी तस्वीर चुनें</h3><input type="file" accept="image/*" onchange="previewImage(this)"><img id="preview" style="max-width:100%;display:block"></div></div>
+</div>
+
+<!-- Library -->
+<div class="panel" id="libraryPanel">
+<div class="panelhead"><h2>📚 Library</h2><button class="close" onclick="closePanels()">बंद करें ✕</button></div>
+<div class="panelcontent"><div class="card"><h3>मेरी Library</h3><p>यहाँ चुनी हुई फाइलें इस ब्राउज़र में अस्थायी रूप से दिखाई देंगी।</p><input type="file" multiple onchange="showFiles(this,'libraryFiles')"><div id="libraryFiles"></div></div></div>
+</div>
+
+<!-- Projects -->
+<div class="panel" id="projectPanel">
+<div class="panelhead"><h2>📁 Projects</h2><button class="close" onclick="closePanels()">बंद करें ✕</button></div>
+<div class="panelcontent"><div class="card"><h3>नया Project</h3><input id="projectName" placeholder="Project का नाम"><button class="primary" onclick="addProject()">बनाएँ</button><div id="projects"></div></div></div>
+</div>
+
+<!-- Remote -->
+<div class="panel" id="remotePanel">
+<div class="panelhead"><h2>🌐 Remote</h2><button class="close" onclick="closePanels()">बंद करें ✕</button></div>
+<div class="panelcontent"><div class="card"><h3>Remote सुविधा</h3><p>यह बटन अभी केवल स्क्रीन दिखाता है। किसी दूसरे डिवाइस या कंप्यूटर को नियंत्रित करने के लिए अलग सुरक्षित Remote सेवा की आवश्यकता होगी।</p></div></div>
+</div>
+
+<!-- Alarms -->
+<div class="panel" id="alarmPanel">
+<div class="panelhead"><h2>⏰ Alarm और Reminders</h2><button class="close" onclick="closePanels()">बंद करें ✕</button></div>
+<div class="panelcontent">
+<div class="card">
+<h3>नया Alarm बनाएँ</h3>
+<label>Alarm का प्रकार</label>
+<select id="alarmType" style="width:100%;padding:10px">
+<option>साधारण Alarm</option><option>फज्र नमाज़</option><option>ज़ुहर नमाज़</option><option>असर नमाज़</option><option>मग़रिब नमाज़</option><option>ईशा नमाज़</option><option>Birthday</option><option>Anniversary</option><option>दूसरा Reminder</option>
+</select>
+<input id="alarmTitle" placeholder="नाम / याद दिलाने का संदेश">
+<input id="alarmDate" type="date">
+<input id="alarmTime" type="time">
+<label><input id="repeatAlarm" type="checkbox"> रोज़ दोहराएँ</label>
+<button class="primary" onclick="addAlarm()">Alarm सेव करें</button>
+<p class="small">नमाज़ के समय अपने स्थानीय मस्जिद के समय के अनुसार भरें।</p>
+</div>
+<div class="card"><h3>मेरे Alarms</h3><div id="alarms"></div></div>
+</div>
+</div>
+
+<script>
+const API_URL="https://buddy-ai-1.onrender.com/chat";
+const $=id=>document.getElementById(id);
+let chatId="buddy-"+Date.now(),chats=load("buddyChats",[]),alarms=load("buddyAlarms",[]),projects=load("buddyProjects",[]);
+let recognition=null,voiceMode=false,muted=false,synth=window.speechSynthesis;
+
+function load(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function openPanel(id){closePanels();$(id).classList.add("show")}
+function closePanels(){document.querySelectorAll(".panel").forEach(p=>p.classList.remove("show"))}
+function addMessage(role,text){$("welcome")?.remove();let row=document.createElement("div");row.className="msg "+role;let av=document.createElement("div");av.className="avatar";av.textContent=role==="user"?"आप":"B";let b=document.createElement("div");b.className="bubble";b.textContent=text;row.append(av,b);$("messages").append(row);$("chat").scrollTop=$("chat").scrollHeight;return b}
+function newChat(){chatId="buddy-"+Date.now();$("messages").innerHTML='<div class="welcome" id="welcome"><h1>आज मैं आपकी क्या मदद करूँ?</h1><p>Buddy AI से कुछ भी पूछें।</p></div>'}
+async function sendMessage(text,fromVoice=false){
+ text=(text||$("question").value).trim();if(!text)return;
+ $("question").value="";addMessage("user",text);let answer=addMessage("bot","जवाब तैयार हो रहा है…");
+ try{
+  const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text,chatId})});
+  const d=await r.json();if(!r.ok)throw Error(d.error||"सर्वर में समस्या");
+  answer.textContent=d.reply||"जवाब नहीं मिला";
+  if(fromVoice&&!muted)speak(d.reply);
+  let old=chats.find(c=>c.id===chatId);if(!old){old={id:chatId,title:text.slice(0,25),messages:[]};chats.unshift(old)}
+  old.messages.push({role:"user",text},{role:"bot",text:d.reply});save("buddyChats",chats);drawHistory();
+ }catch(e){answer.textContent="कनेक्शन समस्या: "+e.message}
+}
+function drawHistory(){let h=$("history");h.innerHTML="";chats.forEach(c=>{let b=document.createElement("button");b.className="sidebtn";b.textContent="💬 "+c.title;b.onclick=()=>{chatId=c.id;$("messages").innerHTML="";c.messages.forEach(m=>addMessage(m.role,m.text))};h.append(b)})}
+function addFile(input){if(input.files[0])addMessage("user","फाइल चुनी गई: "+input.files[0].name)}
+function previewImage(input){if(input.files[0])$("preview").src=URL.createObjectURL(input.files[0])}
+function showFiles(input,target){$(target).innerHTML=[...input.files].map(f=>"<p>"+f.name+"</p>").join("")}
+function addProject(){let n=$("projectName").value.trim();if(!n)return;projects.push(n);save("buddyProjects",projects);$("projectName").value="";drawProjects()}
+function drawProjects(){$("projects").innerHTML=projects.map(p=>"<p>📁 "+p+"</p>").join("")}
+function addAlarm(){
+ let title=$("alarmTitle").value.trim()||$("alarmType").value;
+ let date=$("alarmDate").value,time=$("alarmTime").value;
+ if(!time){alert("Alarm का समय चुनें");return}
+ if(!date&&!$("repeatAlarm").checked){alert("तारीख चुनें");return}
+ alarms.push({id:Date.now(),title,type:$("alarmType").value,date,time,repeat:$("repeatAlarm").checked});
+ save("buddyAlarms",alarms);drawAlarms();$("alarmTitle").value="";
+ if("Notification"in window)Notification.requestPermission();
+}
+function drawAlarms(){
+ $("alarms").innerHTML="";
+ alarms.forEach(a=>{let d=document.createElement("div");d.className="card";d.innerHTML="<b>"+a.title+"</b><p>"+a.date+" "+a.time+(a.repeat?" · रोज़":"")+"</p>";
+ let b=document.createElement("button");b.className="danger";b.textContent="हटाएँ";b.onclick=()=>{alarms=alarms.filter(x=>x.id!==a.id);save("buddyAlarms",alarms);drawAlarms()};d.append(b);$("alarms").append(d)})
+}
+function checkAlarms(){
+ let now=new Date(),date=now.toISOString().slice(0,10),time=now.toTimeString().slice(0,5);
+ alarms.forEach(a=>{let key="alarmFired"+a.id+"_"+date;if(a.time===time&&(a.repeat||a.date===date)&&!sessionStorage.getItem(key)){sessionStorage.setItem(key,"1");alert("⏰ "+a.title);if("Notification"in window&&Notification.permission==="granted")new Notification("Buddy AI Reminder",{body:a.title});beep()}})
+}
+function beep(){try{let c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.15;o.start();setTimeout(()=>{o.stop();c.close()},1200)}catch(e){}}
+setInterval(checkAlarms,15000);
+
+function dictate(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert("Chrome में Voice Recognition उपलब्ध नहीं है");return}
+ let r=new SR();r.lang="hi-IN";r.onresult=e=>$("question").value=e.results[0][0].transcript;r.start()
+}
+function openVoice(){voiceMode=true;$("voice").classList.add("show");listen()}
+function closeVoice(){voiceMode=false;stopSpeaking();try{recognition?.stop()}catch(e){}$("voice").classList.remove("show")}
+function listen(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("voiceStatus").textContent="इस ब्राउज़र में Voice उपलब्ध नहीं";return}
+ if(!voiceMode)return;recognition=new SR();recognition.lang="hi-IN";recognition.continuous=false;recognition.interimResults=false;
+ recognition.onresult=e=>{let t=e.results[0][0].transcript;if(/रुको|रुक जाओ|बस|stop|बंद करो/i.test(t)){stopSpeaking();$("voiceStatus").textContent="आवाज़ रोक दी गई";return}sendMessage(t,true)};
+ recognition.onerror=()=>{$("voiceStatus").textContent="माइक की अनुमति जाँचें"};
+ recognition.onend=()=>{if(voiceMode&&!speechActive())setTimeout(listen,500)};
+ try{recognition.start();$("voiceStatus").textContent="मैं सुन रहा हूँ"}catch(e){}
+}
+function speechActive(){return synth&&synth.speaking}
+function speak(t){if(!voiceMode||muted)return;synth.cancel();let u=new SpeechSynthesisUtterance(t);u.lang=/[अ-ह]/.test(t)?"hi-IN":(/[؀-ۿ]/.test(t)?"ar-SA":"en-US");u.onstart=()=>$("voiceStatus").textContent="Buddy AI जवाब दे रहा है";u.onend=()=>{if(voiceMode)listen()};synth.speak(u)}
+function stopSpeaking(){synth?.cancel();$("voiceStatus").textContent="रोक दिया गया"}
+function toggleMute(){muted=!muted;$("mute").textContent=muted?"🔊 आवाज़ चालू":"🔇 आवाज़ बंद";if(muted)stopSpeaking()}
+$("send").onclick=()=>sendMessage();
+$("question").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage()}});
+drawHistory();drawProjects();drawAlarms();
+</script>
+</body>
+                                                                  </html>
+                                                                  
