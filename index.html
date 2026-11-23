@@ -335,7 +335,7 @@ function addMessage(text, sender) {
   document.getElementById("welcome").style.display = "none";
 
   const div = document.createElement("div");
-  div.className = "message " + sender;
+  div.className = "msg " + (sender === "assistant" ? "bot" : "user");
   div.innerHTML = escapeHTML(text).replace(/\n/g, "<br>");
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
@@ -535,7 +535,7 @@ document.getElementById("libraryFile").addEventListener("change", event => {
   });
 });
   
-<script>
+
 const SpeechRecognition =
   window.SpeechRecognition ||
   window.webkitSpeechRecognition;
