@@ -6,105 +6,176 @@
 <title>Buddy AI</title>
 
 <style>
-:root {
-  --bg: #080b18;
-  --panel: #11172a;
-  --panel-light: #1a2340;
-  --purple: #8b5cf6;
-  --blue: #3b82f6;
-  --text: #f1f5f9;
-  --muted: #94a3b8;
-  --border: rgba(255,255,255,0.09);
-}
-
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
 body {
+  margin: 0;
+  background: #081225;
+  color: white;
   font-family: Arial, sans-serif;
-  background: radial-gradient(circle at top, #182044, #080b18 65%);
-  color: var(--text);
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
-header, .header, .topbar {
-  background: rgba(12,17,36,0.95);
-  border-bottom: 1px solid var(--border);
-  padding: 15px;
-  color: white;
+header {
+  height: 65px;
+  background: #101d32;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  border-bottom: 1px solid #293c58;
+}
+
+.brand {
+  font-size: 22px;
+  font-weight: bold;
 }
 
 button {
-  background: linear-gradient(135deg, var(--purple), var(--blue));
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 11px 16px;
   cursor: pointer;
-  font-weight: 600;
-}
-
-button:hover {
-  opacity: 0.88;
-  box-shadow: 0 0 18px rgba(139,92,246,0.35);
-}
-
-input, textarea {
-  background: #151d35;
   color: white;
-  border: 1px solid var(--border);
+  border: 0;
   border-radius: 12px;
-  padding: 13px;
-  outline: none;
-  width: 100%;
+  padding: 11px;
+  background: #1b3455;
 }
 
-input:focus, textarea:focus {
-  border-color: var(--purple);
-  box-shadow: 0 0 12px rgba(139,92,246,0.2);
+main {
+  height: calc(100vh - 145px);
+  overflow-y: auto;
+  padding: 18px 14px 30px;
+}
+
+.welcome {
+  text-align: center;
+  margin: 12vh auto 25px;
+}
+
+.logo {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  margin: auto auto 15px;
+  background: radial-gradient(
+    circle at 30% 25%,
+    #d8ffff,
+    #42baff 35%,
+    #1455b9 75%
+  );
+  box-shadow: 0 0 30px #36aaff;
 }
 
 .messages {
+  max-width: 750px;
+  margin: auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 18px;
+  gap: 12px;
 }
 
-.message, .msg {
-  max-width: 85%;
+.msg {
   padding: 13px 16px;
   border-radius: 17px;
+  max-width: 85%;
   line-height: 1.5;
-  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
-.message.user, .msg.user {
+.user {
   align-self: flex-end;
-  background: linear-gradient(135deg, #6d42d8, #315fd1);
-  color: white;
-  border-bottom-right-radius: 5px;
+  background: #1767b7;
 }
 
-.message.assistant, .message.bot,
-.msg.assistant, .msg.bot {
+.bot {
   align-self: flex-start;
-  background: #151d35;
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-bottom-left-radius: 5px;
+  background: #172840;
+  border: 1px solid #2b405f;
+}
+
+.composer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px;
+  background: #081225;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.composer textarea {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  height: 44px;
+  border-radius: 14px;
+  padding: 12px;
+  background: #14243b;
+  color: white;
+  border: 1px solid #344b6d;
+  outline: none;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: min(300px, 85vw);
+  background: #101e34;
+  padding: 17px;
+  z-index: 5;
+  overflow: auto;
+  transition: .25s;
+}
+
+.left {
+  left: 0;
+  transform: translateX(-105%);
+}
+
+.right {
+  right: 0;
+  transform: translateX(105%);
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.item {
+  width: 100%;
+  display: block;
+  text-align: left;
+  margin: 9px 0;
+  padding: 14px;
+  background: #192c48;
+  border: 1px solid #304866;
+}
+
+.scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #0009;
+  z-index: 4;
+}
+
+.scrim.show {
+  display: block;
 }
 
 .panel {
   display: none;
-  background: var(--panel);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 18px;
+  max-width: 750px;
+  margin: 15px auto;
+  padding: 16px;
+  background: #13233b;
+  border: 1px solid #304866;
+  border-radius: 15px;
 }
 
 .panel.show {
@@ -113,71 +184,44 @@ input:focus, textarea:focus {
 
 .voice {
   display: none;
-  background: rgba(8,11,24,0.97);
-  color: white;
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  background: radial-gradient(circle, #153968, #071020);
+  z-index: 10;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-  gap: 20px;
+  text-align: center;
 }
 
 .voice.show {
   display: flex;
 }
 
-.drawer {
-  background: var(--panel);
-  color: white;
-  border-left: 1px solid var(--border);
+.orb {
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 25px;
+  font-weight: bold;
+  background: radial-gradient(
+    circle at 30% 25%,
+    #d8ffff,
+    #65dfff 12%,
+    #2499ff 40%,
+    #124eb0 75%
+  );
+  box-shadow: 0 0 40px #39baff;
+  animation: float 2s infinite;
 }
 
-.card {
-  background: linear-gradient(145deg, #151d35, #101629);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 16px;
-  color: white;
-}
-
-a {
-  color: #a78bfa;
-  text-decoration: none;
-}
-
-a:hover {
-  color: #60a5fa;
-}
-
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #080b18;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #514080;
-  border-radius: 10px;
-}
-
-@media (max-width: 600px) {
-  .message, .msg {
-    max-width: 92%;
+@keyframes float {
+  50% {
+    transform: translateY(-7px);
   }
-
-  button {
-    padding: 10px 13px;
-  }
-
-  .messages {
-    padding: 12px;
-  }
-  }
-  
+}
 </style>
 </head>
 <body>
