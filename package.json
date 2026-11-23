@@ -1,14 +1,14 @@
+
 {
   "name": "buddy-ai",
   "version": "1.0.0",
-  "main": "api.js",
+  "main": "API.js",
   "scripts": {
-    "start": "node api.js"
+    "start": "node API.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
-    "express": "^4.18.2",
-    "openai": "^3.0.1"
+    "express": "^4.18.2"
   }
 }
