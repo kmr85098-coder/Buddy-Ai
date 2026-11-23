@@ -536,51 +536,198 @@ document.getElementById("libraryFile").addEventListener("change", event => {
 });
   
 
-const SpeechRecognition =
-  window.SpeechRecognition ||
-  window.webkitSpeechRecognition;
+let recognition;
+let keepListening = false;
+let speakingReply = false;
 
-if (!SpeechRecognition) {
-  alert("Your browser does not support voice recognition.");
-} else {
-  const recognition = new SpeechRecognition();
+function stopVoice() {
+  keepListening = false;
+  speakingReply = false;
 
-  recognition.lang = "hi-IN";
-  recognition.continuous = true;
-  recognition.interimResults = false;
+  if (recognition) {
+    recognition.onend = null;
+    try { recognition.stop(); } catch (e) {}
+  }
 
-  let listening = false;
+  if ("speechSynthesis" in window) {
+    speechSynthesis.cancel();
+  }
 
-  recognition.onresult = function(event) {
-    const result =
-      event.results[event.results.length - 1][0].transcript;
-
-    const command = result.trim().toLowerCase();
-
-    if (command.includes("मेरी बात सुनो") ||
-        command.includes("सुनो")) {
-      listening = true;
-      document.getElementById("status").textContent =
-        "मैं सुन रहा हूँ";
-    }
-
-    if (command.includes("रुक जाओ")) {
-      listening = false;
-      recognition.stop();
-      document.getElementById("status").textContent =
-        "सुनना बंद है";
-    }
-  };
-
-  recognition.onend = function() {
-    if (listening) recognition.start();
-  };
-
-  document.getElementById("micBtn").onclick = function() {
-    listening = true;
-    recognition.start();
-  };
+  document.getElementById("voiceStatus").textContent =
+    "Buddy सुनना और बोलना बंद कर चुका है।";
 }
+
+function speakReply(text) {
+  if (!keepListening) return;
+
+  if (!("speechSynthesis" in window)) {
+    speakingReply = false;
+    return;
+  }
+
+  speakingReply = true;
+  speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+
+  if (/[\u0600-\u06FF]/.test(text)) {
+    utterance.lang = "ar-SA";
+  } else if (/[\u0900-\u097F]/.test(text)) {
+    utterance.lang = "hi-IN";
+  } else {
+    utterance.lang = "en-US";
+  }
+
+  utterance.onend = () => {
+    speakingReply = false;
+    if (keepListening) listenAgain();
+  };
+
+  utterance.onerror = () => {
+    speakingReply = false;
+    if (keepListening) listenAgain();
+  };
+
+  speechSynthesis.speak(utterance);
+}
+
+async function sendVoiceMessage(text) {
+  addMessage(text, "user");
+
+  const loading = addMessage(
+    "Buddy जवाब तैयार कर रहा है...",
+    "assistant"
+  );
+
+  speakingReply = true;
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        chatId: "buddy-main"
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Server error");
+    }
+
+    const reply = data.reply;
+
+    if (!reply) throw new Error("जवाब नहीं मिला।");
+
+    loading.textContent = reply;
+    messages.scrollTop = messages.scrollHeight;
+
+    speakReply(reply);
+
+  } catch (error) {
+    loading.textContent = "समस्या: " + error.message;
+    speakingReply = false;
+
+    if (keepListening) listenAgain();
+  }
+}
+
+function listenAgain() {
+  if (!keepListening || speakingReply) return;
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    document.getElementById("voiceStatus").textContent =
+      "इस ब्राउज़र में Voice उपलब्ध नहीं है।";
+    keepListening = false;
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = "hi-IN";
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    document.getElementById("voiceStatus").textContent =
+      "Buddy सुन रहा है...";
+  };
+
+  recognition.onresult = event => {
+    let finalText = "";
+    let interimText = "";
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const result = event.results[i];
+
+      if (result.isFinal) {
+        finalText += result[0].transcript;
+      } else {
+        interimText += result[0].transcript;
+      }
+    }
+
+    if (interimText) {
+      document.getElementById("voiceStatus").textContent =
+        "आप बोल रहे हैं: " + interimText;
+    }
+
+    if (finalText.trim()) {
+      const spokenText = finalText.trim();
+      const command = spokenText.toLowerCase();
+
+      if (
+        command.includes("रुक जाओ") ||
+        command.includes("बस करो") ||
+        command.includes("stop")
+      ) {
+        stopVoice();
+        return;
+      }
+
+      document.getElementById("voiceStatus").textContent =
+        "आपने कहा: " + spokenText;
+
+      recognition.stop();
+      sendVoiceMessage(spokenText);
+    }
+  };
+
+  recognition.onerror = () => {
+    document.getElementById("voiceStatus").textContent =
+      "आवाज़ सुनने में समस्या हुई।";
+  };
+
+  recognition.onend = () => {
+    if (keepListening && !speakingReply) {
+      setTimeout(listenAgain, 600);
+    }
+  };
+
+  try {
+    recognition.start();
+  } catch (error) {
+    document.getElementById("voiceStatus").textContent =
+      "माइक्रोफोन शुरू नहीं हो पाया।";
+  }
+}
+
+function startVoice() {
+  if (keepListening) {
+    stopVoice();
+    return;
+  }
+
+  keepListening = true;
+  listenAgain();
+  }
+    
+
 </script>
 
 <p id="status">माइक्रोफोन बंद है</p>
