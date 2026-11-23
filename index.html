@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buddy AI</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #081225;
+  color: white;
+  font-family: Arial, sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+header {
+  height: 65px;
+  background: #101d32;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  border-bottom: 1px solid #293c58;
+}
+
+.brand {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+button {
+  cursor: pointer;
+  color: white;
+  border: 0;
+  border-radius: 12px;
+  padding: 11px;
+  background: #1b3455;
+}
+
+main {
+  height: calc(100vh - 145px);
+  overflow-y: auto;
+  padding: 18px 14px 30px;
+}
+
+.welcome {
+  text-align: center;
+  margin: 12vh auto 25px;
+}
+
+.logo {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  margin: auto auto 15px;
+  background: radial-gradient(
+    circle at 30% 25%,
+    #d8ffff,
+    #42baff 35%,
+    #1455b9 75%
+  );
+  box-shadow: 0 0 30px #36aaff;
+}
+
+.messages {
+  max-width: 750px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.msg {
+  padding: 13px 16px;
+  border-radius: 17px;
+  max-width: 85%;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.user {
+  align-self: flex-end;
+  background: #1767b7;
+}
+
+.bot {
+  align-self: flex-start;
+  background: #172840;
+  border: 1px solid #2b405f;
+}
+
+.composer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px;
+  background: #081225;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.composer textarea {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  height: 44px;
+  border-radius: 14px;
+  padding: 12px;
+  background: #14243b;
+  color: white;
+  border: 1px solid #344b6d;
+  outline: none;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: min(300px, 85vw);
+  background: #101e34;
+  padding: 17px;
+  z-index: 5;
+  overflow: auto;
+  transition: .25s;
+}
+
+.left {
+  left: 0;
+  transform: translateX(-105%);
+}
+
+.right {
+  right: 0;
+  transform: translateX(105%);
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.item {
+  width: 100%;
+  display: block;
+  text-align: left;
+  margin: 9px 0;
+  padding: 14px;
+  background: #192c48;
+  border: 1px solid #304866;
+}
+
+.scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #0009;
+  z-index: 4;
+}
+
+.scrim.show {
+  display: block;
+}
+
+.panel {
+  display: none;
+  max-width: 750px;
+  margin: 15px auto;
+  padding: 16px;
+  background: #13233b;
+  border: 1px solid #304866;
+  border-radius: 15px;
+}
+
+.panel.show {
+  display: block;
+}
+
+.voice {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, #153968, #071020);
+  z-index: 10;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.voice.show {
+  display: flex;
+}
+
+.orb {
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 25px;
+  font-weight: bold;
+  background: radial-gradient(
+    circle at 30% 25%,
+    #d8ffff,
+    #65dfff 12%,
+    #2499ff 40%,
+    #124eb0 75%
+  );
+  box-shadow: 0 0 40px #39baff;
+  animation: float 2s infinite;
+}
+
+@keyframes float {
+  50% {
+    transform: translateY(-7px);
+  }
+}
+</style>
+</head>
+<body>
+  
+<header>
+  <button onclick="toggleDrawer('left')">☰</button>
+  <div class="brand">Buddy AI</div>
+  <button onclick="toggleDrawer('right')">⚙</button>
+</header>
+
+<main id="chat">
+  <section class="welcome" id="welcome">
+    <div class="logo"></div>
+    <h2>नमस्ते! मैं Buddy AI हूँ</h2>
+    <p>आज मैं आपकी क्या मदद कर सकता हूँ?</p>
+  </section>
+
+  <div class="messages" id="messages"></div>
+
+  <section class="panel" id="imagePanel">
+    <h3>Image</h3>
+    <input type="file" accept="image/*" id="imageFile">
+    <p>यहाँ आप अपने फोन से तस्वीर चुन सकते हैं।</p>
+    <img id="imagePreview" style="max-width:100%;display:none">
+  </section>
+
+  <section class="panel" id="libraryPanel">
+    <h3>Library</h3>
+    <input type="file" id="libraryFile" multiple>
+    <div id="libraryList"></div>
+  </section>
+
+  <section class="panel" id="projectsPanel">
+    <h3>Projects</h3>
+    <p>आपके प्रोजेक्ट यहाँ दिखाई देंगे।</p>
+  </section>
+
+  <section class="panel" id="remotePanel">
+    <h3>Remote</h3>
+    <p>फोन के दूसरे ऐप नियंत्रित करने के लिए अलग Android ऐप और अनुमति चाहिए।</p>
+  </section>
+
+  <section class="panel" id="alarmPanel">
+    <h3>Alarm / Reminder</h3>
+    <input type="number" id="alarmMinutes" placeholder="मिनट लिखें">
+    <button onclick="setAlarm()">Alarm लगाएँ</button>
+    <p id="alarmStatus"></p>
+  </section>
+
+  <section class="panel" id="reminderPanel">
+    <h3>Reminders</h3>
+    <p>Birthday, Anniversary और Namaz reminders आगे जोड़े जाएँगे।</p>
+  </section>
+</main>
+
+<div class="composer">
+  <button onclick="toggleDrawer('left')">＋</button>
+  <textarea id="messageInput" placeholder="Buddy से कुछ पूछें..."></textarea>
+  <button onclick="startVoice()">🎙</button>
+  <button onclick="sendMessage()">➤</button>
+</div>
+
+<div class="scrim" id="scrim" onclick="closeDrawers()"></div>
+
+<aside class="drawer left" id="leftDrawer">
+  <h2>Tools</h2>
+  <button class="item" onclick="showPanel('imagePanel')">🖼 Image</button>
+  <button class="item" onclick="showPanel('libraryPanel')">📚 Library</button>
+  <button class="item" onclick="showPanel('projectsPanel')">📁 Projects</button>
+  <button class="item" onclick="showPanel('projectsPanel')">🌐 Explore</button>
+  <button class="item" onclick="showPanel('remotePanel')">📱 Remote</button>
+  <button class="item" onclick="closeDrawers()">बंद करें</button>
+</aside>
+
+<aside class="drawer right" id="rightDrawer">
+  <h2>Voice & Alarms</h2>
+  <button class="item" onclick="openVoice()">🔵 Voice Controller</button>
+  <button class="item" onclick="showPanel('alarmPanel')">⏰ Alarm</button>
+  <button class="item" onclick="showPanel('reminderPanel')">🔋 Battery Reminder</button>
+  <button class="item" onclick="showPanel('reminderPanel')">🎂 Birthday</button>
+  <button class="item" onclick="showPanel('reminderPanel')">💍 Anniversary</button>
+  <button class="item" onclick="showPanel('reminderPanel')">🕌 Namaz Reminders</button>
+  <button class="item" onclick="closeDrawers()">बंद करें</button>
+</aside>
+
+<section class="voice" id="voiceScreen">
+  <div class="orb">Buddy</div>
+  <h2>Buddy Voice</h2>
+  <p id="voiceStatus">बोलने के लिए माइक्रोफोन दबाएँ</p>
+  <button onclick="startVoice()">🎙 बोलें</button>
+  <button onclick="closeVoice()">चैट पर वापस जाएँ</button>
+    </section>
+    
+<script>
+const API_URL = "https://buddy-ai-1.onrender.com/chat";
+
+const input = document.getElementById("messageInput");
+const messages = document.getElementById("messages");
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[ch]);
+}
+
+function addMessage(text, sender) {
+  document.getElementById("welcome").style.display = "none";
+
+  const div = document.createElement("div");
+  div.className = "message " + sender;
+  div.innerHTML = escapeHTML(text).replace(/\n/g, "<br>");
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+  return div;
+}
+
+async function sendMessage() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = "";
+  addMessage(text, "user");
+
+  const loading = addMessage("Buddy जवाब तैयार कर रहा है...", "assistant");
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        chatId: "buddy-main"
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Server error " + response.status);
+    }
+
+    const reply = data.reply || data.response || data.message;
+
+    if (!reply) {
+      throw new Error("Server से जवाब नहीं मिला।");
+    }
+
+    loading.textContent = reply;
+  } catch (error) {
+    loading.textContent = "कनेक्शन में समस्या: " + error.message;
+  }
+
+  messages.scrollTop = messages.scrollHeight;
+}
+
+input.addEventListener("keydown", event => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    sendMessage();
+  }
+});
+
+function toggleDrawer(side) {
+  closeDrawers();
+
+  document.getElementById(
+    side === "left" ? "leftDrawer" : "rightDrawer"
+  ).classList.add("open");
+
+  document.getElementById("scrim").classList.add("show");
+}
+
+function closeDrawers() {
+  document.getElementById("leftDrawer").classList.remove("open");
+  document.getElementById("rightDrawer").classList.remove("open");
+  document.getElementById("scrim").classList.remove("show");
+}
+
+function showPanel(id) {
+  closeDrawers();
+
+  document.querySelectorAll(".panel").forEach(panel => {
+    panel.style.display = "none";
+  });
+
+  const panel = document.getElementById(id);
+  if (panel) panel.style.display = "block";
+}
+
+function openVoice() {
+  closeDrawers();
+  document.getElementById("voiceScreen").classList.add("active");
+}
+
+function closeVoice() {
+  document.getElementById("voiceScreen").classList.remove("active");
+}
+
+let recognition;
+
+function startVoice() {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("इस ब्राउज़र में Voice Recognition उपलब्ध नहीं है।");
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = "hi-IN";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  document.getElementById("voiceStatus").textContent =
+    "Buddy सुन रहा है...";
+
+  recognition.onresult = event => {
+    const spokenText = event.results[0][0].transcript;
+    input.value = spokenText;
+    document.getElementById("voiceStatus").textContent =
+      "आपने कहा: " + spokenText;
+    sendMessage();
+  };
+
+  recognition.onerror = () => {
+    document.getElementById("voiceStatus").textContent =
+      "आवाज़ सुनने में समस्या हुई।";
+  };
+
+  recognition.onend = () => {
+    document.getElementById("voiceStatus").textContent =
+      "बोलने के लिए माइक्रोफोन दबाएँ";
+  };
+
+  recognition.start();
+}
+
+let alarmTimer;
+
+function setAlarm() {
+  const minutes = Number(
+    document.getElementById("alarmMinutes").value
+  );
+
+  if (!minutes || minutes < 1) {
+    alert("कम से कम 1 मिनट लिखें।");
+    return;
+  }
+
+  clearTimeout(alarmTimer);
+
+  document.getElementById("alarmStatus").textContent =
+    minutes + " मिनट का Alarm लगाया गया।";
+
+  alarmTimer = setTimeout(() => {
+    alert("Buddy AI: आपका Alarm बज गया!");
+    document.getElementById("alarmStatus").textContent =
+      "Alarm पूरा हुआ।";
+  }, minutes * 60 * 1000);
+}
+
+document.getElementById("imageFile").addEventListener("change", event => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const preview = document.getElementById("imagePreview");
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = "block";
+});
+
+document.getElementById("libraryFile").addEventListener("change", event => {
+  const list = document.getElementById("libraryList");
+
+  Array.from(event.target.files).forEach(file => {
+    const item = document.createElement("p");
+    item.textContent = file.name;
+    list.appendChild(item);
+  });
+});
+</script>
+
+</body>
+</html>
