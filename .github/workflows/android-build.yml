@@ -27,6 +27,17 @@ jobs:
           mkdir -p www
           cp index.html www/index.html
 
+      - name: Ensure Capacitor config
+        run: |
+          cat > capacitor.config.json <<'EOF'
+          {
+            "appId": "com.buddyai.app",
+            "appName": "Buddy AI",
+            "webDir": "www"
+          }
+          EOF
+          cat capacitor.config.json
+
       - name: Create Android project
         run: npx cap add android
 
