@@ -534,7 +534,57 @@ document.getElementById("libraryFile").addEventListener("change", event => {
     list.appendChild(item);
   });
 });
+  
+<script>
+const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+if (!SpeechRecognition) {
+  alert("Your browser does not support voice recognition.");
+} else {
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "hi-IN";
+  recognition.continuous = true;
+  recognition.interimResults = false;
+
+  let listening = false;
+
+  recognition.onresult = function(event) {
+    const result =
+      event.results[event.results.length - 1][0].transcript;
+
+    const command = result.trim().toLowerCase();
+
+    if (command.includes("मेरी बात सुनो") ||
+        command.includes("सुनो")) {
+      listening = true;
+      document.getElementById("status").textContent =
+        "मैं सुन रहा हूँ";
+    }
+
+    if (command.includes("रुक जाओ")) {
+      listening = false;
+      recognition.stop();
+      document.getElementById("status").textContent =
+        "सुनना बंद है";
+    }
+  };
+
+  recognition.onend = function() {
+    if (listening) recognition.start();
+  };
+
+  document.getElementById("micBtn").onclick = function() {
+    listening = true;
+    recognition.start();
+  };
+}
 </script>
+
+<p id="status">माइक्रोफोन बंद है</p>
+  
 
 </body>
 </html>
