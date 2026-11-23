@@ -424,44 +424,72 @@ function closeVoice() {
   document.getElementById("voiceScreen").classList.remove("active");
 }
 
+
 let recognition;
+let keepListening = false;
+let speakingReply = false;
 
 function startVoice() {
   const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
 
   if (!SpeechRecognition) {
     alert("इस ब्राउज़र में Voice Recognition उपलब्ध नहीं है।");
     return;
   }
 
-  recognition = new SpeechRecognition();
-  recognition.lang = "hi-IN";
-  recognition.continuous = false;
-  recognition.interimResults = false;
-
-  document.getElementById("voiceStatus").textContent =
-    "Buddy सुन रहा है...";
-
-  recognition.onresult = event => {
-    const spokenText = event.results[0][0].transcript;
-    input.value = spokenText;
+  if (keepListening) {
+    keepListening = false;
+    if (recognition) recognition.stop();
     document.getElementById("voiceStatus").textContent =
-      "आपने कहा: " + spokenText;
-    sendMessage();
-  };
+      "Voice Controller बंद है।";
+    return;
+  }
 
-  recognition.onerror = () => {
-    document.getElementById("voiceStatus").textContent =
-      "आवाज़ सुनने में समस्या हुई।";
-  };
+  keepListening = true;
 
-  recognition.onend = () => {
-    document.getElementById("voiceStatus").textContent =
-      "बोलने के लिए माइक्रोफोन दबाएँ";
-  };
+  function listenAgain() {
+    if (!keepListening || speakingReply) return;
 
-  recognition.start();
+    recognition = new SpeechRecognition();
+    recognition.lang = "hi-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      document.getElementById("voiceStatus").textContent =
+        "Buddy सुन रहा है...";
+    };
+
+    recognition.onresult = event => {
+      const spokenText = event.results[0][0].transcript;
+      input.value = spokenText;
+      document.getElementById("voiceStatus").textContent =
+        "आपने कहा: " + spokenText;
+      sendMessage();
+    };
+
+    recognition.onerror = () => {
+      document.getElementById("voiceStatus").textContent =
+        "आवाज़ सुनने में समस्या हुई।";
+    };
+
+    recognition.onend = () => {
+      if (keepListening && !speakingReply) {
+        setTimeout(listenAgain, 800);
+      }
+    };
+
+    try {
+      recognition.start();
+    } catch (error) {
+      document.getElementById("voiceStatus").textContent =
+        "माइक्रोफ़ोन शुरू नहीं हो पाया।";
+    }
+  }
+
+  listenAgain();
 }
 
 let alarmTimer;
